@@ -145,7 +145,7 @@ for ext, l of languages
 
   # Ignore [hashbangs](http://en.wikipedia.org/wiki/Shebang_(Unix))
   # and interpolations...
-  l.comment_filter = new RegExp('(^#![/]|^\\s*#\\{|\@docco\-chapter|\@docco-order)')
+  l.comment_filter = new RegExp('(^#![/]|^\\s*#\\{|\\\@docco\\\-chapter|\\\@docco\\\-order)')
 
   # The dividing token we feed into Pygments, to delimit the boundaries between
   # sections.
@@ -205,8 +205,8 @@ if sources.length == 0
 # Determine what chapter each file belongs in, if any.
 chapterList = []
 
-# Extract a key of form @key value from a string buffer. Not current filtered
-# by comment or not.
+# Extract a key of form @key value from a string buffer. Not currently filtered
+# by whether the key is in a comment.
 parseKey = (buffer, key) ->
    keyIdx = fileStr.indexOf(key)
    if keyIdx < 0
@@ -226,6 +226,7 @@ for file in sources
    if !chapterList[chapterName]
       chapterList[chapterName] = []
    chapterList[chapterName].push({ path: file, order: chapterOrder })
+   chapterList[chapterName].sort( (a, b) -> return a.order > b.order ? -1 : 1; );
 
 ensure_directory ->
   fs.writeFile 'docs/docco.css', docco_styles
