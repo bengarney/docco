@@ -48,6 +48,8 @@ h1, h2, h3, h4, h5, h6 {
   #jump_wrapper {
     padding: 0;
     display: none;
+    overflow: scroll;
+    max-height: 100%;
   }
     #jump_to:hover #jump_wrapper {
       display: block;
