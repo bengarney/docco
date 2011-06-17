@@ -9,21 +9,45 @@
 <body>
   <div id="container">
     <div id="background"></div>
-    <% if (sources.length > 1) { %>
+   
+<% 	if(chapters) 
+	{ 
+		chapters.sort();
+		
+		tocList = [];
+		for(var chapterTitle in chapters)
+		{
+			tocList.push({
+				title: chapterTitle
+			});
+			
+			for (var i=0; i<chapters[chapterTitle].length; i++)
+			{
+	            var chapEntry = chapters[chapterTitle][i];
+	            tocList.push({
+	                title: path.basename(chapEntry.path),
+					path: path
+	            });
+			}
+		} %>
       <div id="jump_to">
         Jump To &hellip;
         <div id="jump_wrapper">
           <div id="jump_page">
-            <% for (var i=0, l=sources.length; i<l; i++) { %>
-              <% var source = sources[i]; %>
-              <a class="source" href="<%= path.basename(destination(source)) %>">
-                <%= path.basename(source) %>
-              </a>
+            <% for (var i=0, l=tocList.length; i<l; i++) {
+                  var item = tocList[i];
+				  if(item.path) { %>
+					<a class="source" href="<%= item.path %>">
+						<%= item.title %>
+					</a>
+				  <% } else { %>
+					<b> <%= item.title %> </b>
+				  <% } %>
             <% } %>
           </div>
         </div>
       </div>
-    <% } %>
+<% } %>
     <table cellpadding="0" cellspacing="0">
       <thead>
         <tr>

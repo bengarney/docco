@@ -58,7 +58,7 @@ parse = (source, code) ->
   lines    = code.split '\n'
   sections = []
   language = get_language source
-  has_code = docs_text = code_text = ''
+  has_code = docs_text = code_text = section_name = ''
 
   save = (docs, code) ->
     sections.push docs_text: docs, code_text: code
@@ -107,7 +107,8 @@ generate_html = (source, sections) ->
   title = path.basename source
   dest  = destination source
   html  = docco_template {
-    title: title, sections: sections, sources: sources, path: path, destination: destination
+    title: title, sections: sections, sources: sources, path: path, 
+    destination: destination, chapters: chapterList
   }
   console.log "docco: #{source} -> #{dest}"
   fs.writeFile dest, html
@@ -142,12 +143,9 @@ for ext, l of languages
   # Does the line begin with a comment?
   l.comment_matcher = new RegExp('^\\s*' + l.symbol + '\\s?')
 
-  # Useful for testing constructed regexes:
-  # console.log(l.comment_matcher)
-   
   # Ignore [hashbangs](http://en.wikipedia.org/wiki/Shebang_(Unix))
   # and interpolations...
-  l.comment_filter = new RegExp('(^#![/]|^\\s*#\\{)')
+  l.comment_filter = new RegExp('(^#![/]|^\\s*#\\{|\@docco\-chapter|\@docco-order)')
 
   # The dividing token we feed into Pygments, to delimit the boundaries between
   # sections.
@@ -200,21 +198,41 @@ highlight_end   = '</pre></div>'
 # Run the script.
 # For each source file passed in as an argument, generate the documentation.
 sources = process.ARGV
-if sources.length
-  ensure_directory ->
-    fs.writeFile 'docs/docco.css', docco_styles
-    args = sources.slice(0)
-    next_arg = -> 
-        if args.length
-            a = args.shift()
-            if a is "-c" || a is "--css"
-                a = args.shift()
-                cssExtension = a.search /.css$/i
-                if cssExtension isnt -1
-                    new_styles = fs.readFileSync(fs.realpathSync(a)).toString()
-                    fs.writeFile 'docs/docco.css', docco_styles+"\n"+new_styles
-                    next_arg()
-                    return
-            generate_documentation a, next_arg
-    next_arg()
+if sources.length == 0
+   console.log "No files to convert!"
+   return
+
+# Determine what chapter each file belongs in, if any.
+chapterList = []
+
+# Extract a key of form @key value from a string buffer. Not current filtered
+# by comment or not.
+parseKey = (buffer, key) ->
+   keyIdx = fileStr.indexOf(key)
+   if keyIdx < 0
+      return null
+   keyEndIdx = fileStr.indexOf("\n", keyIdx)
+   return fileStr.substring(keyIdx + key.length, keyEndIdx).trim()
+
+for file in sources
+   fileStr = fs.readFileSync(file).toString()
+
+   chapterName = parseKey(fileStr, "@docco-chapter")
+   chapterOrder = parseKey(fileStr, "@docco-order")
+
+   if(chapterName == null)
+      console.log "Warning: " + file + " has no @docco-chapter entry."
+
+   if !chapterList[chapterName]
+      chapterList[chapterName] = []
+   chapterList[chapterName].push({ path: file, order: chapterOrder })
+
+ensure_directory ->
+  fs.writeFile 'docs/docco.css', docco_styles
+  args = sources.slice(0)
+  next_arg = -> 
+      if args.length
+          a = args.shift()
+          generate_documentation a, next_arg
+  next_arg()
 
