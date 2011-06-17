@@ -10,26 +10,38 @@
   <div id="container">
     <div id="background"></div>
    
-<% 	if(chapters) 
+<% 	
+	if(chapters) 
 	{ 
-		chapters.sort();
-		
-		tocList = [];
-		for(var chapterTitle in chapters)
+		chapters.sort(function(a, b) 
 		{
-			tocList.push({
-				title: chapterTitle
-			});
+			var aKey = parseInt(a.title);
+			var bKey = parseInt(b.title);
 			
-			for (var i=0; i<chapters[chapterTitle].length; i++)
+			if(aKey != aKey) aKey = 999999;
+			if(bKey != bKey) bKey = 999999;
+			
+			return aKey - bKey; 
+		});
+		
+		var tocList = [];
+		for(var key in chapters)
+		{
+			var chapter = chapters[key];
+			tocList.push({
+				title: chapter.title
+			});
+
+			for (var i=0; i<chapter.pages.length; i++)
 			{
-	            var chapEntry = chapters[chapterTitle][i];
+	            var chapEntry = chapter.pages[i];
 	            tocList.push({
 	                title: path.basename(chapEntry.path),
 					path: path.basename(destination(chapEntry.path))
 	            });
 			}
-		} %>
+		}
+		%>
       <div id="jump_to">
         Jump To &hellip;
         <div id="jump_wrapper">
@@ -47,7 +59,7 @@
           </div>
         </div>
       </div>
-<% } %>
+<% 	} %>
     <table cellpadding="0" cellspacing="0">
       <thead>
         <tr>

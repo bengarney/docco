@@ -223,10 +223,17 @@ for file in sources
    if(chapterName == null)
       console.log "Warning: " + file + " has no @docco-chapter entry."
 
-   if !chapterList[chapterName]
-      chapterList[chapterName] = []
-   chapterList[chapterName].push({ path: file, order: chapterOrder })
-   chapterList[chapterName].sort( (a, b) -> return a.order > b.order ? -1 : 1; );
+   foundChapter = null
+   for chapter in chapterList
+      if chapter.title == chapterName
+         foundChapter = chapter
+         break
+   if foundChapter == null
+      foundChapter = { title: chapterName, pages: [] }
+      chapterList.push(foundChapter)
+
+   foundChapter.pages.push({ path: file, order: chapterOrder })
+   foundChapter.pages.sort( (a, b) -> return a.order > b.order ? 1 : -1; );
 
 ensure_directory ->
   fs.writeFile 'docs/docco.css', docco_styles
