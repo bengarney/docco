@@ -126,15 +126,15 @@ showdown = require('./../vendor/showdown').Showdown
 # add another language to Docco's repertoire, add it here.
 languages =
   '.coffee':
-    name: 'coffee-script', symbol: '#'
+    name: 'coffee-script', symbol: '#', comment: '#'
   '.js':
-    name: 'javascript', symbol: '//'
+    name: 'javascript', symbol: '//', comment: '//'
   '.rb':
-    name: 'ruby', symbol: '#'
+    name: 'ruby', symbol: '#', comment: '#'
   '.py':
-    name: 'python', symbol: '#'
+    name: 'python', symbol: '#', comment: '#'
   '.as':
-    name: 'actionscript', symbol: '//'
+    name: 'actionscript', symbol: '(//|\\\*/|/\\\*\\\*|/\\\*|\\\*)', comment: '//'
 
 # Build out the appropriate matchers and delimiters for each language.
 for ext, l of languages
@@ -142,18 +142,21 @@ for ext, l of languages
   # Does the line begin with a comment?
   l.comment_matcher = new RegExp('^\\s*' + l.symbol + '\\s?')
 
+  # Useful for testing constructed regexes:
+  # console.log(l.comment_matcher)
+   
   # Ignore [hashbangs](http://en.wikipedia.org/wiki/Shebang_(Unix))
   # and interpolations...
   l.comment_filter = new RegExp('(^#![/]|^\\s*#\\{)')
 
   # The dividing token we feed into Pygments, to delimit the boundaries between
   # sections.
-  l.divider_text = '\n' + l.symbol + 'DIVIDER\n'
+  l.divider_text = '\n' + l.comment + 'DIVIDER\n'
 
   # The mirror of `divider_text` that we expect Pygments to return. We can split
   # on this to recover the original sections.
   # Note: the class is "c" for Python and "c1" for the other languages
-  l.divider_html = new RegExp('\\n*<span class="c1?">' + l.symbol + 'DIVIDER<\\/span>\\n*')
+  l.divider_html = new RegExp('\\n*<span class="c1?">' + l.comment + 'DIVIDER<\\/span>\\n*')
 
 # Get the current language we're documenting, based on the extension.
 get_language = (source) -> languages[path.extname(source)]
