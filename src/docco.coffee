@@ -241,6 +241,9 @@ ensure_directory ->
   next_arg = -> 
       if args.length
           a = args.shift()
+          if !get_language(a)
+             console.log "Warning: can't identify language for " + a + ", skipping..."
+             return next_arg()
           generate_documentation a, next_arg
   next_arg()
 
