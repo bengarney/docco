@@ -212,6 +212,8 @@ parseKey = (buffer, key) ->
    if keyIdx < 0
       return null
    keyEndIdx = fileStr.indexOf("\n", keyIdx)
+   if keyEndIdx < keyIdx
+      keyEndIdx = fileStr.length
    return fileStr.substring(keyIdx + key.length, keyEndIdx).trim()
 
 for file in sources
@@ -233,7 +235,7 @@ for file in sources
       chapterList.push(foundChapter)
 
    foundChapter.pages.push({ path: file, order: chapterOrder })
-   foundChapter.pages.sort( (a, b) -> return a.order > b.order ? 1 : -1; );
+   foundChapter.pages.sort( (a, b) -> return ((a.order > b.order) ? 1 : -1); );
 
 ensure_directory ->
   fs.writeFile 'docs/docco.css', docco_styles

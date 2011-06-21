@@ -26,15 +26,29 @@
 		for(var key in chapters)
 		{
 			var chapter = chapters[key];
+			if(chapter.title == null)
+				continue;
+
 			tocList.push({
 				title: chapter.title
+			});
+			
+			chapter.pages.sort(function(a, b) 
+			{
+				var aKey = parseInt(a.order);
+				var bKey = parseInt(b.order);
+
+				if(aKey != aKey) aKey = 999999;
+				if(bKey != bKey) bKey = 999999;
+
+				return aKey - bKey; 
 			});
 
 			for (var i=0; i<chapter.pages.length; i++)
 			{
 	            var chapEntry = chapter.pages[i];
 	            tocList.push({
-	                title: path.basename(chapEntry.path),
+	                title: path.basename(chapEntry.path) /* + " - " + chapEntry.order */,
 					path: path.basename(destination(chapEntry.path))
 	            });
 			}
